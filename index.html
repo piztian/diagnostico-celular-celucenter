@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico Celular — CeluCenter</title>
+  <style>
+    :root {
+      --turquesa: #4DB6AC;
+      --turquesa-oscuro: #00897B;
+      --rosa: #F48FB1;
+      --negro: #333333;
+      --blanco: #FFFFFF;
+      --rosa-piel: #FDDCCC;
+      --gris-claro: #F5F5F5;
+      --rojo: #E53935;
+      --verde: #43A047;
+      --naranja: #FB8C00;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--gris-claro);
+      color: var(--negro);
+      min-height: 100vh;
+    }
+
+    .header {
+      background: var(--turquesa);
+      color: var(--blanco);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .header .logo {
+      width: 36px;
+      height: 36px;
+      background: var(--blanco);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .header .sucursal-tag {
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* INFO SUCURSAL */
+    .info-section {
+      background: var(--blanco);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .info-section h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #888;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-grid .full { grid-column: 1 / -1; }
+
+    .info-field label {
+      font-size: 11px;
+      color: #888;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .info-field input, .info-field select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--gris-claro);
+      transition: border-color 0.2s;
+    }
+
+    .info-field input:focus, .info-field select:focus {
+      outline: none;
+      border-color: var(--turquesa);
+      background: var(--blanco);
+    }
+
+    /* SECCIONES */
+    .section-card {
+      background: var(--blanco);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .section-header:active { background: var(--gris-claro); }
+
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      flex: 1;
+    }
+
+    .section-title h3 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .section-title span {
+      font-size: 11px;
+      color: #888;
+    }
+
+    .section-toggle {
+      font-size: 18px;
+      color: #aaa;
+      transition: transform 0.2s;
+    }
+
+    .section-card.open .section-toggle { transform: rotate(180deg); }
+
+    .section-body {
+      display: none;
+      padding: 0 16px 16px;
+      border-top: 1px solid #F0F0F0;
+    }
+
+    .section-card.open .section-body { display: block; }
+
+    /* CHECK ITEMS */
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F5F5F5;
+    }
+
+    .check-item:last-child { border-bottom: none; }
+
+    .check-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #ccc;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .check-item input[type="checkbox"]:checked {
+      background: var(--turquesa);
+      border-color: var(--turquesa);
+    }
+
+    .check-item input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .check-item input[type="checkbox"].fail {
+      background: var(--rojo);
+      border-color: var(--rojo);
+    }
+
+    .check-item input[type="checkbox"].warn {
+      background: var(--naranja);
+      border-color: var(--naranja);
+    }
+
+    .check-label {
+      flex: 1;
+    }
+
+    .check-label .item-name {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .check-label .item-sub {
+      font-size: 11px;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    .check-status {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .status-btn {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .status-btn.ok {
+      background: #E8F5E9;
+      color: var(--verde);
+    }
+
+    .status-btn.ok.active {
+      background: var(--verde);
+      color: white;
+    }
+
+    .status-btn.warn {
+      background: #FFF3E0;
+      color: var(--naranja);
+    }
+
+    .status-btn.warn.active {
+      background: var(--naranja);
+      color: white;
+    }
+
+    .status-btn.fail {
+      background: #FFEBEE;
+      color: var(--rojo);
+    }
+
+    .status-btn.fail.active {
+      background: var(--rojo);
+      color: white;
+    }
+
+    /* NOTAS */
+    .nota-field {
+      margin-top: 10px;
+    }
+
+    .nota-field label {
+      font-size: 11px;
+      color: #888;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .nota-field textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+      background: var(--gris-claro);
+    }
+
+    .nota-field textarea:focus {
+      outline: none;
+      border-color: var(--turquesa);
+      background: var(--blanco);
+    }
+
+    /* RESULTADO */
+    .result-box {
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .result-box.good {
+      background: #E8F5E9;
+      border: 2px solid var(--verde);
+    }
+
+    .result-box.medium {
+      background: #FFF3E0;
+      border: 2px solid var(--naranja);
+    }
+
+    .result-box.bad {
+      background: #FFEBEE;
+      border: 2px solid var(--rojo);
+    }
+
+    .result-box h2 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .result-box p {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    /* BOTONES */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--turquesa);
+      color: var(--blanco);
+    }
+
+    .btn-primary:active { background: var(--turquesa-oscuro); }
+
+    .btn-secondary {
+      background: var(--gris-claro);
+      color: var(--negro);
+    }
+
+    .btn-secondary:active { background: #E0E0E0; }
+
+    .btn-whatsapp {
+      background: #25D366;
+      color: var(--blanco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-whatsapp:active { background: #1DA851; }
+
+    /* REPORTE GENERADO */
+    #reporteGenerado {
+      display: none;
+      background: var(--blanco);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    #reporteGenerado h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: var(--turquesa);
+    }
+
+    #reporteContent {
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--negro);
+    }
+
+    .copy-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: var(--turquesa);
+      color: var(--blanco);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* SUCURSAL SELECT MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-box {
+      background: var(--blanco);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .modal-box h3 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .modal-box select {
+      width: 100%;
+      padding: 10px;
+      border: 1.5px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .modal-box .btn {
+      width: 100%;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      height: 4px;
+      background: #E0E0E0;
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--turquesa);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📱</div>
+  <h1>Diagnóstico Celular</h1>
+  <span class="sucursal-tag" id="sucursalTag" style="display:none">—</span>
+</div>
+
+<div class="container">
+
+  <!-- INFO SUCURSAL -->
+  <div class="info-section">
+    <h2>Información del equipo</h2>
+    <div class="info-grid">
+      <div class="info-field full">
+        <label>Sucursal</label>
+        <select id="sucursal" onchange="actualizarSucursal()">
+          <option value="">— Seleccionar sucursal —</option>
+          <option value="ATEQUIZA">ATEQUIZA</option>
+          <option value="ATOYAC">ATOYAC</option>
+          <option value="COLOMO">COLOMO</option>
+          <option value="CONTLA">CONTLA</option>
+          <option value="COTIJA">COTIJA</option>
+          <option value="GOMEZ FARIAS">GOMEZ FARIAS</option>
+          <option value="HUESCALAPA">HUESCALAPA</option>
+          <option value="JIQUILPAN CH">JIQUILPAN CH</option>
+          <option value="JOCOTEPEC">JOCOTEPEC</option>
+          <option value="MATRIZ (TAMAZULA)">MATRIZ (TAMAZULA)</option>
+          <option value="PONCITLAN">PONCITLAN</option>
+          <option value="SAN ANDRES">SAN ANDRES</option>
+          <option value="SAN GABRIEL">SAN GABRIEL</option>
+          <option value="SAN LUIS SOYATLAN">SAN LUIS SOYATLAN</option>
+          <option value="SANTA CRUZ">SANTA CRUZ</option>
+          <option value="TAMA CH">TAMA CH</option>
+          <option value="TAMA RC">TAMA RC</option>
+          <option value="TECALITLAN">TECALITLAN</option>
+          <option value="TECALITLAN CH">TECALITLAN CH</option>
+          <option value="TEOCUITATLAN">TEOCUITATLAN</option>
+          <option value="TIZAPAN">TIZAPAN</option>
+          <option value="TONAYA">TONAYA</option>
+          <option value="TUXPAN">TUXPAN</option>
+          <option value="USMAJAC">USMAJAC</option>
+          <option value="ZAPOTILTIC">ZAPOTILTIC</option>
+          <option value="ZAPOTILTIC RF">ZAPOTILTIC RF</option>
+          <option value="ZAPOTLAN">ZAPOTLAN</option>
+        </select>
+      </div>
+      <div class="info-field">
+        <label>Marca</label>
+        <select id="marca">
+          <option value="">—</option>
+          <option value="Apple iPhone">Apple iPhone</option>
+          <option value="Samsung">Samsung</option>
+          <option value="Xiaomi">Xiaomi</option>
+          <option value="Motorola">Motorola</option>
+          <option value="Huawei">Huawei</option>
+          <option value="OPPO">OPPO</option>
+          <option value="ZTE">ZTE</option>
+          <option value="POCO">POCO</option>
+          <option value="Honor">Honor</option>
+          <option value="Tecno">Tecno</option>
+          <option value="Infinix">Infinix</option>
+          <option value="BLU">BLU</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="info-field">
+        <label>Modelo</label>
+        <input type="text" id="modelo" placeholder="Ej: iPhone 14, Galaxy A54">
+      </div>
+      <div class="info-field">
+        <label>IMEI</label>
+        <input type="text" id="imei" placeholder="15 dígitos">
+      </div>
+      <div class="info-field">
+        <label>¿Qué es?</label>
+        <select id="tipo">
+          <option value="">—</option>
+          <option value="Venta">Venta</option>
+          <option value="Servicio">Servicio / Reparación</option>
+          <option value="Garantía">Garantía</option>
+          <option value="Toma de usado">Toma de usado</option>
+        </select>
+      </div>
+      <div class="info-field">
+        <label>Nombre del evaluador</label>
+        <input type="text" id="evaluador" placeholder="Tu nombre">
+      </div>
+      <div class="info-field">
+        <label>Fecha</label>
+        <input type="date" id="fecha">
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTADO PREVIO -->
+  <div id="resultadoBox" class="result-box" style="display:none">
+    <h2 id="resultadoTitulo">—</h2>
+    <p id="resultadoSub"></p>
+    <div class="progress-bar" style="margin-top:10px">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- SECCION 1: EXTERNO -->
+  <div class="section-card open" id="sec-externo">
+    <div class="section-header" onclick="toggleSection('externo')">
+      <div class="section-icon" style="background:#FCE4EC; color:#C2185B">🔍</div>
+      <div class="section-title">
+        <h3>1. Diagnóstico Externo</h3>
+        <span>Inspección física del equipo</span>
+      </div>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="check-item">
+        <input type="checkbox" id="ext-pantalla">
+        <div class="check-label">
+          <div class="item-name">Pantalla</div>
+          <div class="item-sub">Sin grietas, manchas, o píxeles quemados</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-pantalla','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-pantalla','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-pantalla','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="ext-cuerpo">
+        <div class="check-label">
+          <div class="item-name">Cuerpo / Marco</div>
+          <div class="item-sub">Sin abolladuras severas ni corrosión</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-cuerpo','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-cuerpo','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-cuerpo','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="ext-puerto">
+        <div class="check-label">
+          <div class="item-name">Puerto de carga</div>
+          <div class="item-sub">Pines limpios y sin daños</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-puerto','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-puerto','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-puerto','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="ext-bocinas">
+        <div class="check-label">
+          <div class="item-name">Bocinas y micrófono</div>
+          <div class="item-sub">Sin obstrucciones, funcionan</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-bocinas','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-bocinas','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-bocinas','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="ext-camaras">
+        <div class="check-label">
+          <div class="item-name">Cámaras</div>
+          <div class="item-sub">Lentes sin rayaduras, enfoque ok</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-camaras','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-camaras','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-camaras','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="ext-botones">
+        <div class="check-label">
+          <div class="item-name">Botones</div>
+          <div class="item-sub">Volumen, encendido, silenciador — responden bien</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-botones','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-botones','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-botones','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="ext-imei">
+        <div class="check-label">
+          <div class="item-name">IMEI verificado</div>
+          <div class="item-sub">IMEI legible y coincide con caja/etiqueta</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'ext-imei','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'ext-imei','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'ext-imei','fail')">✗</button>
+        </div>
+      </div>
+      <div class="nota-field">
+        <label>Notas / Hallazgos externos</label>
+        <textarea id="nota-externo" placeholder="Ej: Pantalla con pequeña marca en esquina inferior derecha..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCION 2: INTERNO -->
+  <div class="section-card" id="sec-interno">
+    <div class="section-header" onclick="toggleSection('interno')">
+      <div class="section-icon" style="background:#E3F2FD; color:#1565C0">⚙️</div>
+      <div class="section-title">
+        <h3>2. Diagnóstico Interno</h3>
+        <span>Rendimiento y funcionamiento de software</span>
+      </div>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="check-item">
+        <input type="checkbox" id="int-almacenamiento">
+        <div class="check-label">
+          <div class="item-name">Almacenamiento</div>
+          <div class="item-sub">Espacio disponible / total</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-almacenamiento','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-almacenamiento','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-almacenamiento','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-ram">
+        <div class="check-label">
+          <div class="item-name">RAM</div>
+          <div class="item-sub">Memoria disponible al abrir apps</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-ram','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-ram','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-ram','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-bateria">
+        <div class="check-label">
+          <div class="item-name">Batería</div>
+          <div class="item-sub">Salud de batería aceptable (mínimo 80% para usado)</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-bateria','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-bateria','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-bateria','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-wifi">
+        <div class="check-label">
+          <div class="item-name">WiFi</div>
+          <div class="item-sub">Se conecta y tiene buena señal</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-wifi','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-wifi','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-wifi','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-bluetooth">
+        <div class="check-label">
+          <div class="item-name">Bluetooth</div>
+          <div class="item-sub">Enciende y detecta dispositivos</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-bluetooth','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-bluetooth','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-bluetooth','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-datos">
+        <div class="check-label">
+          <div class="item-name">Datos móviles</div>
+          <div class="item-sub">Recibe señal, datos funcionan</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-datos','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-datos','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-datos','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-camara-frontal">
+        <div class="check-label">
+          <div class="item-name">Cámara frontal</div>
+          <div class="item-sub">Enfoca y muestra imagen clara</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-camara-frontal','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-camara-frontal','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-camara-frontal','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-camara-trasera">
+        <div class="check-label">
+          <div class="item-name">Cámara trasera</div>
+          <div class="item-sub">Enfoca, flash, graba video</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-camara-trasera','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-camara-trasera','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-camara-trasera','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-pantalla-tactil">
+        <div class="check-label">
+          <div class="item-name">Pantalla táctil</div>
+          <div class="item-sub">Todos los puntos responden (prueba multi-touch)</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-pantalla-tactil','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-pantalla-tactil','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-pantalla-tactil','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-gps">
+        <div class="check-label">
+          <div class="item-name">GPS / Ubicación</div>
+          <div class="item-sub">Ubica correctamente en mapas</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-gps','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-gps','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-gps','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="int-sensores">
+        <div class="check-label">
+          <div class="item-name">Sensores</div>
+          <div class="item-sub">Acelerómetro, giroscopio, huella (si aplica)</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'int-sensores','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'int-sensores','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'int-sensores','fail')">✗</button>
+        </div>
+      </div>
+      <div class="nota-field">
+        <label>Notas / Hallazgos internos</label>
+        <textarea id="nota-interno" placeholder="Ej: Batería al 73% — reemplazar. Almacenamiento lleno al 95%..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCION 3: OPTIMIZACION -->
+  <div class="section-card" id="sec-optimizacion">
+    <div class="section-header" onclick="toggleSection('optimizacion')">
+      <div class="section-icon" style="background:#E8F5E9; color:#2E7D32">🚀</div>
+      <div class="section-title">
+        <h3>3. Optimización</h3>
+        <span>Acciones recomendadas y aplicadas</span>
+      </div>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="check-item">
+        <input type="checkbox" id="opt-reset">
+        <div class="check-label">
+          <div class="item-name">Reset de fábrica</div>
+          <div class="item-sub">¿Se recomienda o ya se hizo?</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'opt-reset','ok')">✓ Sí</button>
+          <button class="status-btn warn" onclick="setStatus(this,'opt-reset','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'opt-reset','fail')">✗ No</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="opt-bloqueo">
+        <div class="check-label">
+          <div class="item-name">Cuenta Google/Apple</div>
+          <div class="item-sub">Verificar que NO tenga cuenta anterior vinculada (FRP)</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'opt-bloqueo','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'opt-bloqueo','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'opt-bloqueo','fail')">✗ Bloqueado</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="opt-bloatware">
+        <div class="check-label">
+          <div class="item-name">Bloatware removido</div>
+          <div class="item-sub">Apps preinstaladas innecesarias eliminadas</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'opt-bloatware','ok')">✓ Listo</button>
+          <button class="status-btn warn" onclick="setStatus(this,'opt-bloatware','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'opt-bloqueo','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="opt-cache">
+        <div class="check-label">
+          <div class="item-name">Caché limpiada</div>
+          <div class="item-sub">Se limpió caché del sistema</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'opt-cache','ok')">✓ Listo</button>
+          <button class="status-btn warn" onclick="setStatus(this,'opt-cache','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'opt-cache','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="opt-actualizacion">
+        <div class="check-label">
+          <div class="item-name">Software actualizado</div>
+          <div class="item-sub">Última versión disponible instalada</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'opt-actualizacion','ok')">✓ Listo</button>
+          <button class="status-btn warn" onclick="setStatus(this,'opt-actualizacion','warn')">⚠ Pendiente</button>
+          <button class="status-btn fail" onclick="setStatus(this,'opt-actualizacion','fail')">✗</button>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="opt-carga">
+        <div class="check-label">
+          <div class="item-name">Prueba de carga</div>
+          <div class="item-sub">El equipo carga correctamente</div>
+        </div>
+        <div class="check-status">
+          <button class="status-btn ok" onclick="setStatus(this,'opt-carga','ok')">✓ OK</button>
+          <button class="status-btn warn" onclick="setStatus(this,'opt-carga','warn')">⚠</button>
+          <button class="status-btn fail" onclick="setStatus(this,'opt-carga','fail')">✗</button>
+        </div>
+      </div>
+      <div class="nota-field">
+        <label>Notas de optimización / Refacciones necesarias</label>
+        <textarea id="nota-optimizacion" placeholder="Ej: Requiere cambio de batería, limpiar contactos del puerto..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUGERENCIAS -->
+  <div class="section-card" id="sec-sugerencias">
+    <div class="section-header" onclick="toggleSection('sugerencias')">
+      <div class="section-icon" style="background:#FFF3E0; color:#E65100">💡</div>
+      <div class="section-title">
+        <h3>4. Sugerencias para el cliente</h3>
+        <span>Lo que se le puede ofrecer o recomendar</span>
+      </div>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="check-item">
+        <input type="checkbox" id="sug-cambio-bateria">
+        <div class="check-label">
+          <div class="item-name">Cambio de batería</div>
+          <div class="item-sub">Ofrecer reemplazo de batería si está degradada</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="sug-mica">
+        <div class="check-label">
+          <div class="item-name">Mica de hidrogel</div>
+          <div class="item-sub">Proteger pantalla con mica nueva</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="sug-funda">
+        <div class="check-label">
+          <div class="item-name">Funda nueva</div>
+          <div class="item-sub">Si la actual está dañada</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="sug-cargador">
+        <div class="check-label">
+          <div class="item-name">Cargador / Turbo cargador</div>
+          <div class="item-sub">Si no incluye o está dañado</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="sug-audifonos">
+        <div class="check-label">
+          <div class="item-name">Audífonos / Buds</div>
+          <div class="item-sub">Si no incluye o cliente interesa</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="sug-garantia">
+        <div class="check-label">
+          <div class="item-name">Garantía extendida</div>
+          <div class="item-sub">Ofrecer plan de garantía adicional</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <input type="checkbox" id="sug-funda-pantalla">
+        <div class="check-label">
+          <div class="item-name">Paquete protector</div>
+          <div class="item-sub">Mica + funda + vidrio templado combo</div>
+        </div>
+      </div>
+      <div class="nota-field">
+        <label>Otras sugerencias / Notas finales</label>
+        <textarea id="nota-sugerencias" placeholder="Ej: Cliente interesado en seguro contra robo..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTON GENERAR -->
+  <button class="btn btn-primary" onclick="generarReporte()" style="width:100%; margin-bottom:10px">
+    📋 Generar Reporte
+  </button>
+
+  <!-- REPORTE GENERADO -->
+  <div id="reporteGenerado">
+    <h3>📋 Reporte de Diagnóstico</h3>
+    <div id="reporteContent"></div>
+    <button class="copy-btn" onclick="copiarReporte()">📋 Copiar Reporte</button>
+    <button class="btn btn-whatsapp" onclick="enviarWhatsApp()" style="width:100%; margin-top:10px; flex:none">
+      📲 Enviar por WhatsApp
+    </button>
+  </div>
+
+</div>
+
+<script>
+  // Set date default
+  document.getElementById('fecha').valueAsDate = new Date();
+
+  const statusMap = {};
+
+  function setStatus(btn, id, status) {
+    // Clear siblings
+    btn.parentElement.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const checkbox = document.getElementById(id);
+    const cbClass = checkbox.className;
+    checkbox.className = '';
+
+    if (status === 'ok') {
+      checkbox.checked = true;
+      checkbox.classList.add('ok');
+      statusMap[id] = 'ok';
+    } else if (status === 'warn') {
+      checkbox.checked = true;
+      checkbox.classList.add('warn');
+      statusMap[id] = 'warn';
+    } else {
+      checkbox.checked = true;
+      checkbox.classList.add('fail');
+      statusMap[id] = 'fail';
+    }
+    actualizarResultado();
+  }
+
+  function toggleSection(name) {
+    const card = document.getElementById('sec-' + name);
+    card.classList.toggle('open');
+  }
+
+  function actualizarSucursal() {
+    const val = document.getElementById('sucursal').value;
+    const tag = document.getElementById('sucursalTag');
+    if (val) {
+      tag.style.display = 'block';
+      tag.textContent = val;
+    } else {
+      tag.style.display = 'none';
+    }
+  }
+
+  function actualizarResultado() {
+    const items = document.querySelectorAll('.check-item input[type="checkbox"]');
+    let total = 0, ok = 0, warn = 0, fail = 0;
+    items.forEach(cb => {
+      if (cb.checked || statusMap[cb.id]) {
+        total++;
+        const s = statusMap[cb.id] || (cb.classList.contains('ok') ? 'ok' : cb.classList.contains('warn') ? 'warn' : 'fail');
+        if (s === 'ok') ok++;
+        else if (s === 'warn') warn++;
+        else fail++;
+      }
+    });
+
+    if (total === 0) return;
+
+    const pct = Math.round((ok / total) * 100);
+    const box = document.getElementById('resultadoBox');
+    box.style.display = 'block';
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    if (fail > 0) {
+      box.className = 'result-box bad';
+      document.getElementById('resultadoTitulo').textContent = '⚠ Requiere atención';
+      document.getElementById('resultadoSub').textContent = fail + ' falla(s), ' + warn + ' advertencia(s) — ' + ok + ' bien';
+    } else if (warn > 0) {
+      box.className = 'result-box medium';
+      document.getElementById('resultadoTitulo').textContent = '🟡 En buenas condiciones';
+      document.getElementById('resultadoSub').textContent = warn + ' advertencia(s) — ' + ok + ' bien';
+    } else {
+      box.className = 'result-box good';
+      document.getElementById('resultadoTitulo').textContent = '✅ Excelente';
+      document.getElementById('resultadoSub').textContent = pct + '% del equipo en óptimas condiciones';
+    }
+  }
+
+  function getField(id) {
+    return document.getElementById(id).value || '—';
+  }
+
+  function generarReporte() {
+    const sucursal = getField('sucursal');
+    const marca = getField('marca');
+    const modelo = getField('modelo');
+    const imei = getField('imei');
+    const tipo = getField('tipo');
+    const evaluador = getField('evaluador');
+    const fecha = getField('fecha');
+
+    if (!sucursal || !marca || !modelo) {
+      alert('Completa al menos: Sucursal, Marca y Modelo');
+      return;
+    }
+
+    let reporte = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 REPORTE DE DIAGNÓSTICO
+CeluCenter
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 SUCURSAL: ${sucursal}
+👤 EVALUADOR: ${evaluador}
+📅 FECHA: ${fecha}
+📋 TIPO: ${tipo}
+
+━━━━━━━━ DATOS DEL EQUIPO ━━━━━━━━━
+📱 MARCA: ${marca}
+🔹 MODELO: ${modelo}
+🔢 IMEI: ${imei}`;
+
+    // External
+    const extItems = ['ext-pantalla','ext-cuerpo','ext-puerto','ext-bocinas','ext-camaras','ext-botones','ext-imei'];
+    const extNames = ['Pantalla','Cuerpo/Marco','Puerto de carga','Bocinas y micrófono','Cámaras','Botones','IMEI verificado'];
+    reporte += '\n\n🔍 1. DIAGNÓSTICO EXTERNO';
+    reporte += '\n━━━━━━━━━━━━━━━━━━━━';
+    extItems.forEach((id, i) => {
+      const s = statusMap[id] || '—';
+      const icon = s === 'ok' ? '✅' : s === 'warn' ? '⚠️' : s === 'fail' ? '❌' : '—';
+      reporte += '\n' + icon + ' ' + extNames[i];
+    });
+    const notaExt = getField('nota-externo');
+    if (notaExt !== '—') reporte += '\n📝 Notas: ' + notaExt;
+
+    // Internal
+    const intItems = ['int-almacenamiento','int-ram','int-bateria','int-wifi','int-bluetooth','int-datos',
+                      'int-camara-frontal','int-camara-trasera','int-pantalla-tactil','int-gps','int-sensores'];
+    const intNames = ['Almacenamiento','RAM','Batería','WiFi','Bluetooth','Datos móviles',
+                      'Cámara frontal','Cámara trasera','Pantalla táctil','GPS/Ubicación','Sensores'];
+    reporte += '\n\n⚙️ 2. DIAGNÓSTICO INTERNO';
+    reporte += '\n━━━━━━━━━━━━━━━━━━━━';
+    intItems.forEach((id, i) => {
+      const s = statusMap[id] || '—';
+      const icon = s === 'ok' ? '✅' : s === 'warn' ? '⚠️' : s === 'fail' ? '❌' : '—';
+      reporte += '\n' + icon + ' ' + intNames[i];
+    });
+    const notaInt = getField('nota-interno');
+    if (notaInt !== '—') reporte += '\n📝 Notas: ' + notaInt;
+
+    // Optimization
+    const optItems = ['opt-reset','opt-bloqueo','opt-bloatware','opt-cache','opt-actualizacion','opt-carga'];
+    const optNames = ['Reset de fábrica','Cuenta Google/Apple (FRP)','Bloatware removido','Caché limpiada','Software actualizado','Prueba de carga'];
+    reporte += '\n\n🚀 3. OPTIMIZACIÓN';
+    reporte += '\n━━━━━━━━━━━━━━━━━━━━';
+    optItems.forEach((id, i) => {
+      const s = statusMap[id] || '—';
+      const icon = s === 'ok' ? '✅' : s === 'warn' ? '⚠️' : s === 'fail' ? '❌' : '—';
+      reporte += '\n' + icon + ' ' + optNames[i];
+    });
+    const notaOpt = getField('nota-optimizacion');
+    if (notaOpt !== '—') reporte += '\n📝 Notas: ' + notaOpt;
+
+    // Suggestions
+    const sugItems = ['sug-cambio-bateria','sug-mica','sug-funda','sug-cargador','sug-audifonos','sug-garantia','sug-funda-pantalla'];
+    const sugNames = ['Cambio de batería','Mica de hidrogel','Funda nueva','Cargador/Turbo','Audífonos/Buds','Garantía extendida','Paquete protector'];
+    reporte += '\n\n💡 4. SUGERENCIAS AL CLIENTE';
+    reporte += '\n━━━━━━━━━━━━━━━━━━━━';
+    let sugCount = 0;
+    sugItems.forEach((id, i) => {
+      const cb = document.getElementById(id);
+      if (cb.checked) {
+        reporte += '\n👉 ' + sugNames[i];
+        sugCount++;
+      }
+    });
+    if (sugCount === 0) reporte += '\n(sin opciones seleccionadas)';
+    const notaSug = getField('nota-sugerencias');
+    if (notaSug !== '—') reporte += '\n📝 Notas: ' + notaSug;
+
+    // Summary score
+    let total = 0, ok = 0, warn = 0, fail = 0;
+    [...extItems, ...intItems, ...optItems].forEach(id => {
+      if (statusMap[id]) {
+        total++;
+        if (statusMap[id] === 'ok') ok++;
+        else if (statusMap[id] === 'warn') warn++;
+        else fail++;
+      }
+    });
+    if (total > 0) {
+      const pct = Math.round((ok / total) * 100);
+      const resumen = fail > 0 ? '⚠️ REQUIERE ATENCIÓN' : warn > 0 ? '🟡 BUEN ESTADO' : '✅ ÓPTIMO';
+      reporte += '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+      reporte += '\n📊 CALIFICACIÓN: ' + resumen;
+      reporte += '\n   ' + ok + ' OK | ' + warn + ' ⚠️ | ' + fail + ' ❌';
+      reporte += '\n   Puntuación: ' + pct + '%';
+    }
+
+    reporte += '\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+    reporte += '\nGenerado desde CeluCenter — Diagnóstico Celular';
+
+    document.getElementById('reporteContent').textContent = reporte;
+    document.getElementById('reporteGenerado').style.display = 'block';
+    document.getElementById('reporteGenerado').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function copiarReporte() {
+    const text = document.getElementById('reporteContent').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✅ ¡Copiado!';
+      setTimeout(() => btn.textContent = '📋 Copiar Reporte', 2000);
+    });
+  }
+
+  function enviarWhatsApp() {
+    const text = encodeURIComponent(document.getElementById('reporteContent').textContent);
+    window.open('https://wa.me/?text=' + text, '_blank');
+  }
+</script>
+
+</body>
+</html>
